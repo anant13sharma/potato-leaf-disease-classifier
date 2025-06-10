@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Potato Disease Classifier</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #4e54c8; /* Static background color */
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #ffffff;
+  }
+
+  .upload-card {
+    background-color: #3949ab; /* Slightly lighter than body */
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 100%;
+    color: #ffffff;
+  }
+
+  .preview-img {
+    max-width: 100%;
+    height: auto;
+    display: none;
+    margin-top: 1rem;
+    border-radius: 12px;
+    border: 2px dashed #ffffff;
+  }
+
+  h2, h5 {
+    text-align: center;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  footer {
+    font-size: 0.85rem;
+    color: #ffffffaa;
+    text-align: center;
+    width: 100%;
+    margin-top: 4rem;
+    padding: 1rem 0;
+  }
+
+  .btn-success {
+    font-weight: 600;
+    background-color: #28a745;
+    border: none;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .btn-success:hover {
+    background-color: #218838;
+    transform: scale(1.02);
+  }
+
+  .spinner-border {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  input[type="file"] {
+    background-color: #ffffff;
+    color: #000000;
+  }
+
+  .sample-img {
+    border-radius: 10px;
+    border: 3px solid #ffffff;
+    transition: transform 0.2s ease;
+    cursor: pointer;
+    max-height: 150px;
+  }
+
+  .sample-img:hover {
+    transform: scale(1.05);
+  }
+
+  .result-badge {
+    font-size: 1.25rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+  }
+
+  a {
+    color: #ffffff;
+    text-decoration: underline;
+  }
+
+  a:hover {
+    color: #f1f1f1;
+  }
+</style>
+</head>
+<body>
+  <div class="upload-card mb-5">
+    <h2 class="mb-4">🌿 Potato Leaf Classifier</h2>
+
+    <!-- Upload Image -->
+    <form id="predictForm" enctype="multipart/form-data">
+      <div class="mb-3">
+        <input class="form-control" type="file" name="file" id="fileInput" accept="image/*" capture="environment" required>
+      </div>
+      <img id="preview" src="#" alt="Image Preview" class="preview-img" />
+      <button class="btn btn-success w-100 mt-3" type="submit" id="submitBtn">🔍 Predict</button>
+      <div class="text-center mt-4" id="loading" style="display: none;">
+        <div class="spinner-border text-light" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-light mt-2">Analyzing image, please wait...</p>
+      </div>
+    </form>
+
+    <!-- Result -->
+    <div id="resultContainer" class="mt-4 text-center" style="display: none;">
+      <h5 class="text-white">🧪 Prediction Result</h5>
+      <p class="fs-5 text-white">The model detected:</p>
+      <p><span class="badge bg-success result-badge" id="predictedLabel"></span></p>
+    </div>
+
+    <!-- Sample Images -->
+    <div class="mt-5">
+      <h5 class="text-white mb-3">Try with sample images:</h5>
+      <div class="d-flex justify-content-between flex-wrap gap-3">
+        {% for category, img_path in samples %}
+        <form method="post" action="/predict-sample" class="sample-form">
+          <input type="hidden" name="path" value="{{ img_path }}">
+          <button type="submit" class="btn p-0 border-0 bg-transparent">
+            <img src="/{{ img_path }}" alt="Sample" class="sample-img">
+          </button>
+        </form>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+<!-- About Section -->
+
+<div class="mt-5 text-center px-3" style="color: #ffffffde; max-width: 800px;">
+  <h5 class="fw-bold">About This Classifier</h5>
+ <p>
+    This tool uses a deep learning model trained with TensorFlow to detect 
+    <strong>Potato Leaf Diseases</strong> — specifically 
+    <em>Early Blight</em>, <em>Late Blight</em>, and <em>Healthy</em> conditions.
+    The model was trained on a subset of potato leaf images from the <strong>PlantVillage</strong> dataset 
+    using a convolutional neural network (CNN).
+  </p>
+  <p style="font-size: 0.9rem;">
+    Dataset Source: 
+    <a href="https://data.mendeley.com/datasets/tywbtsjrjv/1" target="_blank" style="color: #ffffff; text-decoration: underline;">
+      Mendeley Data: Identification of Plant Leaf Diseases
+    </a>
+    (Pandian & Gopal, 2019, DOI: 10.17632/tywbtsjrjv.1), derived from the original 
+    <a href="https://arxiv.org/abs/1511.08060" target="_blank" style="color: #ffffff; text-decoration: underline;">
+      PlantVillage dataset
+    </a>
+    (Hughes & Salathé, 2015).
+  </p>
+</div>
+
+<footer class="container">
+  &copy; <span id="year"></span> Anant Sharma. All rights reserved.
+</footer>
+
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const form = document.getElementById("predictForm");
+    const loading = document.getElementById("loading");
+    const submitBtn = document.getElementById("submitBtn");
+    const resultContainer = document.getElementById("resultContainer");
+    const predictedLabel = document.getElementById("predictedLabel");
+
+    fileInput.onchange = evt => {
+      const [file] = fileInput.files;
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+      }
+    };
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      loading.style.display = "block";
+      submitBtn.disabled = true;
+      submitBtn.innerText = "🔄 Predicting...";
+
+      const formData = new FormData(form);
+
+      fetch("/predict", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        loading.style.display = "none";
+        submitBtn.disabled = false;
+        submitBtn.innerText = "🔍 Predict";
+
+        predictedLabel.textContent = data.label;
+        resultContainer.style.display = "block";
+      })
+      .catch(err => {
+        loading.style.display = "none";
+        submitBtn.disabled = false;
+        submitBtn.innerText = "🔍 Predict";
+        alert("Prediction failed. Please try again.");
+        console.error(err);
+      });
+    });
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
