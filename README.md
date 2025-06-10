@@ -91,21 +91,22 @@ The model is saved as `potatoes.h5` and used for inference in the backend.
 
 ---
 ## Folder Structure
-```text
-potato-disease-classifier/
-├── api/
-│   ├── main.py               # FastAPI backend code
-│   └── potatoes.h5           # Trained Keras model
+potato-leaf-disease-classifier/
+├── main.py
+├── potatoes.h5
+├── requirements.txt
 ├── templates/
-│   ├── index.html            # Main frontend template
-│   └── result.html           # (Optional) secondary result template
-├── static/                   # Static assets (images, CSS, etc.)
-├── Training/
-│   ├── PotatoDiseaseNotebook.ipynb  # Training notebook
-│   └── PlantVillage/                # Dataset directory
-├── requirements.txt         # Python dependencies
-└── README.md                # This file
-```
+│   ├── index.html
+│   └── result.html
+├── static/
+│   └── samples/
+│       ├── Potato___Early_blight/
+│       │   └── 1.jpg
+│       ├── Potato___Late_blight/
+│       │   └── 2.jpg
+│       └── Potato___healthy/
+│           └── 3.jpg
+
 ---
 
 ## Technology Stack
