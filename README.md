@@ -1,4 +1,7 @@
-![Demo](ezgif.com-animated-gif-maker.gif)
+
+![ezgif com-crop](https://github.com/user-attachments/assets/15e572b0-f036-4d11-a7ed-99b715918c43)
+
+
 # Potato Leaf Disease Classification
 
 This tool uses a convolutional neural network (CNN) implemented in TensorFlow and Keras to detect potato leaf diseases — specifically **Early Blight**, **Late Blight**, and **Healthy** conditions. The model was trained on images from the **PlantVillage dataset**, which provides a clean, high-quality dataset of leaf images captured in controlled environments.
@@ -91,7 +94,8 @@ The model is saved as `potatoes.h5` and used for inference in the backend.
 
 ---
 ## Folder Structure
-potato-leaf-disease-classifier/
+```
+potato-disease-classifier/
 ├── main.py
 ├── potatoes.h5
 ├── requirements.txt
@@ -106,8 +110,7 @@ potato-leaf-disease-classifier/
 │       │   └── 2.jpg
 │       └── Potato___healthy/
 │           └── 3.jpg
-
----
+```
 
 ## Technology Stack
 
